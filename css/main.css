@@ -643,3 +643,40 @@ canvas:focus-visible {
     transition-duration: 0.001ms;
   }
 }
+
+/* ==========================================================================
+   Hero portrait
+   ========================================================================== */
+
+.hero-portrait {
+  margin: 0;
+}
+
+.hero-portrait img {
+  display: block;
+  width: 100%;
+  max-width: 330px;
+  height: auto;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+}
+
+.hero-portrait figcaption {
+  max-width: 330px;
+  margin-top: var(--space-2);
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+@media (min-width: 992px) {
+  /* Sit the portrait against the right edge of its column on wide screens. */
+  .hero-portrait img,
+  .hero-portrait figcaption {
+    margin-left: auto;
+  }
+
+  .hero-portrait figcaption {
+    text-align: right;
+  }
+}
