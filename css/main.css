@@ -48,6 +48,14 @@ h3 {
   letter-spacing: -0.02em;
 }
 
+/* We load bootstrap-grid.min.css rather than full Bootstrap, which means
+   Reboot's image rule is absent. Without this, any image with intrinsic
+   width attributes renders at full natural size and blows out its column. */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
 a {
   color: var(--accent);
 }
