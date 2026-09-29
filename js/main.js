@@ -8,7 +8,7 @@
 
 import { skills, work, education, skillGroups } from "./data.js";
 import { createConstellation } from "./constellation.js";
-import { createBoard } from "./chess/board-ui.js";
+import { createRetriever } from "./retriever-ui.js";
 
 const KIND_LABEL = {
   experience: "Experience",
@@ -210,19 +210,20 @@ function initConstellation() {
   }
 }
 
-/** Mount the agent chess board if this page has one. */
-function initBoard() {
-  const boardEl = document.querySelector("#chessBoard");
-  if (!boardEl) {
+/** Mount the BM25 query router if this page has one. */
+function initRetriever() {
+  const formEl = document.querySelector("#askForm");
+  if (!formEl) {
     return;
   }
 
-  createBoard({
-    boardEl,
-    statusEl: document.querySelector("#chessStatus"),
-    panelEl: document.querySelector("#chessAgents"),
-    resetEl: document.querySelector("#chessReset"),
-    undoEl: document.querySelector("#chessUndo"),
+  createRetriever({
+    formEl,
+    inputEl: document.querySelector("#askInput"),
+    resultEl: document.querySelector("#askResult"),
+    examplesEl: document.querySelector("#askExamples"),
+    work,
+    skills,
   });
 }
 
@@ -253,7 +254,7 @@ function init() {
   }
 
   initConstellation();
-  initBoard();
+  initRetriever();
   initNav();
   initFooterYear();
 }

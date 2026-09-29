@@ -22,11 +22,14 @@ const RADIUS = {
   publication: 8,
 };
 
+// Mirrors the --node-* custom properties in css/main.css. Kept as literals
+// because the canvas cannot read CSS variables without a getComputedStyle
+// round trip on every frame.
 const COLOR = {
-  skill: "#5eead4",
-  experience: "#818cf8",
-  project: "#f472b6",
-  publication: "#fbbf24",
+  skill: "#81b64c",
+  experience: "#7fa1d8",
+  project: "#e0a63c",
+  publication: "#c58af9",
 };
 
 /** Ideal edge length as a fraction of the space available per node. */
@@ -326,7 +329,7 @@ export function createConstellation({ canvas, list, skills, work, onSelect }) {
 
       // A dark pad behind the text keeps it readable where edges cross it.
       context.globalAlpha = 0.72;
-      context.fillStyle = "#0b1020";
+      context.fillStyle = "#262421";
       context.fillRect(
         box.left,
         box.top,
@@ -335,7 +338,7 @@ export function createConstellation({ canvas, list, skills, work, onSelect }) {
       );
 
       context.globalAlpha = 1;
-      context.fillStyle = node === focus ? "#f8fafc" : "#cbd5e1";
+      context.fillStyle = node === focus ? "#f1efed" : "#cfc9c3";
       context.fillText(text, x, y);
     });
 
@@ -349,8 +352,8 @@ export function createConstellation({ canvas, list, skills, work, onSelect }) {
     edges.forEach((edge) => {
       const lit = !focus || edge.from === focus || edge.to === focus;
       context.strokeStyle = lit
-        ? "rgba(148, 163, 184, 0.5)"
-        : "rgba(148, 163, 184, 0.09)";
+        ? "rgba(169, 162, 155, 0.5)"
+        : "rgba(169, 162, 155, 0.09)";
       context.lineWidth = lit ? 1.3 : 0.7;
       context.beginPath();
       context.moveTo(edge.from.x, edge.from.y);
@@ -369,7 +372,7 @@ export function createConstellation({ canvas, list, skills, work, onSelect }) {
       context.fill();
 
       if (node === focus) {
-        context.strokeStyle = "#f8fafc";
+        context.strokeStyle = "#f1efed";
         context.lineWidth = 2.5;
         context.stroke();
       }

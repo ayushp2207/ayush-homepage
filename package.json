@@ -14,7 +14,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"**/*.{js,css,html,json,md}\"",
-    "format:check": "prettier --check \"**/*.{js,css,html,json,md}\""
+    "format:check": "prettier --check \"**/*.{js,css,html,json,md}\"",
+    "test:routing": "node docs/routing-test.mjs"
   },
   "keywords": [
     "portfolio",

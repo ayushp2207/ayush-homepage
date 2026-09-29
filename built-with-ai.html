@@ -101,8 +101,9 @@
             r&eacute;sum&eacute; as the source of truth.
           </li>
           <li>
-            Propose a creative addition that would not look like every other
-            submission, then implement it without pulling in a library.
+            Propose a creative addition that reflects what I actually work on
+            &mdash; not a generic widget &mdash; then implement it without
+            pulling in a library.
           </li>
           <li>
             Wire the project to the course ESLint configuration and Prettier,
@@ -122,9 +123,8 @@
             ES6 modules in <code>js/</code>.
           </li>
           <li>
-            The chess engine in <code>js/chess/</code> &mdash; 0x88 board
-            representation, legal move generation, alpha&ndash;beta search and
-            the three agent evaluation functions.
+            The BM25 retriever in <code>js/retriever.js</code> and its interface
+            &mdash; tokeniser, stemmer, ranking and the score breakdown.
           </li>
           <li>
             The force-directed skill graph in <code>js/constellation.js</code>,
@@ -141,13 +141,15 @@
             model.
           </li>
           <li>
-            The decision of what the creative addition should be: a committee of
-            disagreeing agents, because that is the architecture I actually work
-            on, rather than a decorative animation.
+            The decision of what the creative addition should be: a retriever
+            over my own work, because routing and ranking is what I actually do
+            &mdash; rather than a decorative animation, or the chess engine I
+            had it build first and then threw away for being impressive but
+            irrelevant.
           </li>
           <li>
-            Insisting the engine be verified with <code>perft</code> before any
-            interface was built on top of it.
+            Insisting it be measured against questions I already knew the
+            answers to, before I would believe the ranking.
           </li>
           <li>
             The narrated video, the code review, and the final read-through of
@@ -157,8 +159,8 @@
 
         <h2>Where the AI was wrong</h2>
         <p>
-          Worth recording, because it is the part people leave out. Two concrete
-          mistakes caught during review:
+          Worth recording, because it is the part people leave out. Four
+          concrete mistakes caught during review:
         </p>
         <ul>
           <li>
@@ -173,17 +175,20 @@
             it floated unconnected in the middle of the canvas.
           </li>
           <li>
-            In the chess widget it marked an agent as having &ldquo;no
-            preference&rdquo; whenever its top two moves tied &mdash; but a tie
-            between two strong moves is still an opinion about every other move.
-            The agent that had just found a way to win a pawn was being reported
-            as indifferent. Real indifference is when <em>every</em>
-            move scores the same.
+            Its first retriever scored cosine similarity over TF-IDF vectors,
+            which over-rewards short documents: asking about &ldquo;multi-agent
+            orchestration over MCP&rdquo; returned
+            <em>Pit Wall</em> rather than the AT&amp;T system, purely because
+            Pit Wall&rsquo;s description is shorter. BM25 normalises by length
+            relative to the corpus average, and fixed it.
           </li>
           <li>
-            It left a stray <code>loadFen(undefined)</code> in the board reset,
-            which threw on load, so the pieces never rendered until the first
-            click and &ldquo;New game&rdquo; restored 31 pieces instead of 32.
+            Even then the query still missed, because my r&eacute;sum&eacute;
+            says &ldquo;orchestr<em>ator</em>&rdquo; while the query says
+            &ldquo;orchestr<em>ation</em>&rdquo;. The stemmer collapsed
+            <code>-ation</code>, <code>-ating</code> and <code>-ated</code> to a
+            shared stem but had no rule for the <code>-ator</code> agent noun,
+            so the two forms never met.
           </li>
         </ul>
 
@@ -191,9 +196,14 @@
         <p>
           Because the interesting question about a tool like this is not whether
           it was used, but what you still have to know in order to use it. The
-          model wrote a spring-force simulation in a few seconds; it also wrote
-          a hash that would have broken the page. Telling those apart is the
-          actual skill, and it is not one you can outsource.
+          model wrote a working BM25 implementation in a few minutes; it also
+          wrote a subresource hash that would have broken the page, and a
+          ranking that was quietly wrong in a way that only surfaced when I
+          tested it against questions I already knew the answer to. Telling
+          those apart is the actual skill, and it is not one you can outsource.
+          The retriever is trustworthy not because a model wrote it, but because
+          it routes 12 of 12 held-out queries correctly and the test file is in
+          the repository.
         </p>
       </section>
     </main>

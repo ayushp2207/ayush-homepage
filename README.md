@@ -1,9 +1,9 @@
 # Ayush Patel — Personal Homepage
 
 A static personal homepage built with vanilla HTML5, CSS3 and ES6 modules. No
-framework, no backend, no build step. Its centrepiece is a **chess engine
-written from scratch**, played by a committee of three disagreeing agents — a
-small, honest model of the multi-agent systems I build.
+framework, no backend, no build step. Its centrepiece is a **BM25 retriever
+over my own work**: ask it a question and it routes you to the right project,
+showing the term-level scoring that decided it.
 
 **🔗 Live site: https://ayushp2207.github.io/ayush-homepage/**
 
@@ -23,91 +23,91 @@ makes that link browsable instead of asking you to reconstruct it from prose.
 
 ---
 
-## ⭐ The creative addition: an agent committee that plays chess
+## ⭐ The creative addition: a retriever over my own work
 
-**This is the original component that differentiates this page.** It is a
-complete chess engine written from scratch — **no chess library, no engine
-binary, no chart library** — driven by three specialist agents that argue
-about what to play.
+**This is the original component that differentiates this page.** Ask a
+question in plain English and a **BM25 retriever** routes it to the right
+role, project or paper — and shows you the term-level scoring that decided it.
 
-![The agent board](images/screenshot-board.png)
+![The query router](images/screenshot-router.png)
 
-### Why this and not a decorative widget
+### Why this
 
-At AT&T I built a multi-agent system where one orchestrator coordinates three
-specialist sub-agents over MCP. The useful signal there was never the final
-answer; it was **where the specialists disagreed**, because disagreement is
-where the interesting part of the position lives.
+Most of what I actually do is routing. At AT&T a parent orchestrator picks
+which of three specialist sub-agents handles a request over MCP; at the WiNES
+lab I built MCP servers exposing hardware as LLM-callable tools and then
+measured how often the model picked the right one; at Pibit I built the
+retrieval layer that decides which documents an answer gets built from.
 
-Chess is an honest demonstration domain for that, because the objectives
-genuinely conflict. Taking a free pawn can wreck your king. A committee that
-always agrees teaches you nothing; this one frequently doesn't.
+All three are the same problem: **score candidates against a query, pick one,
+and be able to defend the choice.** So the widget is that, pointed at my own
+résumé. Asking it "multi-agent orchestration over MCP" is asking the same
+question my AT&T orchestrator answers, about the same kind of corpus.
 
-### What it does
+### What it shows you
 
-You play White. On each of your moves, three agents independently search the
-position with **different evaluation functions**:
+Not just an answer — the working:
 
-| Agent           | Optimises for                          | Ignores           |
-| --------------- | -------------------------------------- | ----------------- |
-| **Material**    | Raw piece values                       | Everything else   |
-| **Space**       | Central control and piece activity     | Material entirely |
-| **King safety** | Shelter and exposure around both kings | Material entirely |
+- **Which terms carried the score**, with each one's BM25 contribution. Ask
+  about MCP and you can see `mcp` contributing 1.70 while `agent` contributes
+  1.86.
+- **What it also considered**, with scores, so you can see how close the call
+  was.
+- **Which of your words it doesn't have**, so a miss is explainable rather
+  than mysterious.
+- **When it refuses.** Below a confidence floor it says "no confident match"
+  instead of handing you the nearest document. A retriever that always returns
+  its best guess is the most common way tool routing fails in production: it
+  answers confidently out of the wrong document.
 
-Each runs its own alpha–beta search and votes. A **coordinator** then searches
-with a weighted blend and picks the move, and the panel reports how many agents
-it agreed with. When an agent genuinely has no preference — a pure material
-agent in a quiet opening, where every move scores zero — it says so, instead of
-presenting an arbitrary pick as a recommendation.
+### How it works
 
-### The engine
+[`js/retriever.js`](js/retriever.js) — no search library:
 
-In [`js/chess/engine.js`](js/chess/engine.js):
+- Tokenise, drop stopwords, **suffix-stem** so "orchestrator", "orchestration"
+  and "orchestrating" collapse to one term
+- **BM25** ranking (`k1 = 1.5`, `b = 0.75`) with smoothed, always-positive IDF
+- Per-term contribution tracking, which is what makes the explanation possible
 
-- **0x88 board representation** with make/unmake
-- **Fully legal move generation**: castling through and out of check, en
-  passant, promotion, pins, and checkmate/stalemate detection
-- **Alpha–beta search** with capture-first move ordering
+### Why BM25 and not cosine TF-IDF
 
-And in [`js/chess/agents.js`](js/chess/agents.js), the three evaluations, the
-weighted coordinator, and algebraic move notation with check and mate suffixes.
+The first version scored cosine similarity over TF-IDF vectors and got a
+question wrong: _"multi-agent orchestration over MCP"_ routed to **Pit Wall**
+instead of the **AT&T** system. Both are genuinely multi-agent, but Pit Wall's
+description is shorter, and L2 normalisation over-rewards short documents.
 
-### How I know the engine is correct
+BM25 normalises by length relative to the corpus average instead, which is the
+exact problem it was designed for. That fixed it — along with a second bug the
+failure exposed: the résumé says "orchestr**ator**" while the query says
+"orchestr**ation**", and the stemmer had no rule for the `-ator` agent noun, so
+the two never met.
 
-A chess move generator can be subtly wrong in ways that playing by hand will
-never reveal — a missed en-passant edge case, castling through an attacked
-square. So the engine is verified with **perft**: counting the leaf nodes of
-the move tree to a fixed depth and comparing against published values.
+### Routing accuracy
 
-| Position          | Depth | Expected | Result |
-| ----------------- | ----- | -------- | ------ |
-| Start position    | 4     | 197,281  | ✅     |
-| Kiwipete          | 3     | 97,862   | ✅     |
-| En passant / pins | 4     | 43,238   | ✅     |
-| Promotions        | 3     | 9,467    | ✅     |
-| Position 5        | 3     | 62,379   | ✅     |
+12 of 12 on a held-out set of realistic questions, including two that
+_should_ return nothing:
 
-All five standard suites pass exactly. A generator that matches perft on
-Kiwipete is almost certainly right; one that does not is broken in a way no
-amount of manual testing would surface.
+| Query                                                    | Routes to              |
+| -------------------------------------------------------- | ---------------------- |
+| multi-agent orchestration over MCP                       | AT&T DNS agents        |
+| how do you keep data consistent under concurrent writes? | AWS Transfer Family    |
+| computer vision on video                                 | 6G mmWave              |
+| retrieval augmented generation                           | Pibit.ai               |
+| kubernetes and openshift                                 | WiNES 5G testbed       |
+| bayesian networks                                        | Rand-PC                |
+| tell me about your favourite pizza topping               | _(no confident match)_ |
+| blockchain smart contracts                               | _(no confident match)_ |
 
-Performance: roughly **12,000 positions searched in ~50ms** per move, so the
-committee replies instantly with no web worker needed.
-
-### Accessibility
-
-Every square is a real `<button>` in a grid with an `aria-label` naming its
-square and occupant, so the board is fully keyboard-operable and legible to a
-screen reader. Pieces are Unicode glyphs, so there is no sprite sheet to load.
+Reproduce with `npm run test:routing`.
 
 ## A second interactive piece: the Skill Constellation
 
 On the [Projects page](projects.html), a force-directed graph wires all 23
 skills and work items together — pick a skill and every place I used it stays
-lit while the rest dims. Also hand-written canvas code, using the
-Fruchterman–Reingold formulation with the ideal edge length derived from canvas
-area and node count, so it lays out correctly at 396px and 1098px with no
-breakpoint-specific constants.
+lit while the rest dims. Hand-written canvas code using the
+Fruchterman–Reingold formulation, with the ideal edge length derived from
+canvas area and node count so it lays out correctly at 396px and 1098px with
+no breakpoint-specific constants.
 
 ![The skill constellation](images/screenshot-constellation.png)
 
@@ -178,11 +178,9 @@ Static site with no build step, so GitHub Pages serves the repo root directly:
 ├── js/
 │   ├── main.js                # Entry point: renders sections, wires nav
 │   ├── data.js                # Single source of truth for all content
-│   ├── constellation.js       # Force-directed skill graph (projects page)
-│   └── chess/
-│       ├── engine.js          # 0x88 board, legal move gen, perft
-│       ├── agents.js          # Three evaluations + coordinator, alpha-beta
-│       └── board-ui.js        # Board rendering and interaction
+│   ├── retriever.js          # BM25 index and scoring (the creative addition)
+│   ├── retriever-ui.js       # Query form and score breakdown
+│   └── constellation.js      # Force-directed skill graph (projects page)
 ├── images/
 │   ├── favicon.svg            # Monogram icon
 │   └── screenshot-*.png       # README and design doc images

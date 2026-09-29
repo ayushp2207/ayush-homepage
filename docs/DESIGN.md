@@ -113,33 +113,30 @@ graduate, so I can match them to a requisition._
 
 ### Epic B — Show how I actually think
 
-**B1.** _As Daniel, I want to see the candidate's architectural thinking, not
-just a list of technologies._
+**B1.** _As Daniel, I want to ask about a technology in my own words and find
+the relevant work, rather than scanning a list._
 
-- Given the agent board on the homepage
-- When I make a move
-- Then three agents each report a different recommended reply with a score
-- And the coordinator states how many of them it agreed with
-- So the disagreement itself is the visible output
+- Given the query router on the homepage
+- When I type "multi-agent orchestration over MCP"
+- Then it routes to the AT&T system
+- And it lists the terms that carried the score with their contributions
 
-**B2.** _As Daniel, I want to know the chess engine is real and not a library._
+**B2.** _As Daniel, I want to know whether the match was close or decisive._
 
-- Given the repository
-- Then `js/chess/engine.js` contains the move generator
-- And the README publishes perft node counts against known values
+- Given any confident result
+- Then the runner-up documents are listed with their scores
 
-**B3.** _As Meera on a phone, I want to use the board without a mouse._
+**B3.** _As Daniel, I want it to admit when it doesn't know._
 
-- Given a touch device or keyboard-only navigation
-- When I Tab to a square and press Enter
-- Then that piece is selected and its legal destinations are marked
-- And every square announces its name and occupant to a screen reader
+- Given a query unrelated to my work
+- Then it reports "no confident match" rather than the nearest document
+- And names the query terms absent from the corpus
 
-**B4.** _As anyone, I want to undo a bad move rather than restart._
+**B4.** _As Meera on a phone, I want to try it without typing._
 
-- Given at least one completed exchange
-- When I press "Take back"
-- Then my move and the coordinator's reply are both undone
+- Given the example chips below the input
+- When I activate one
+- Then that query runs immediately
 
 **B5.** _As Daniel, I want to find where a given skill was used._
 
@@ -198,7 +195,7 @@ at me._
 ```
 index.html ............. Home
 ├── Hero ............... name, one-line pitch, contact, availability
-├── Agent chess board .. the creative addition
+├── Query router ....... the creative addition
 ├── Experience ......... reverse-chronological timeline (4 roles)
 ├── Education .......... 2 degrees
 └── Toolkit ............ grouped skill lists
@@ -375,10 +372,10 @@ Default (nothing selected)          Selected: "Python"
 
 ### Palette
 
-Borrowed from chess.com, because the board is the centrepiece and the rest of
-the page should look like it belongs to the same product. Warm near-black
-rather than blue-black, so the board's greens sit naturally on it, with a
-single bright green carrying every call to action.
+Warm near-black rather than blue-black, with a single bright green carrying
+every interactive element. Only one hue does the accent work: everything
+interactive is green and nothing decorative is, which is what keeps a dark
+page from turning muddy.
 
 | Token              | Value                 | Use                          |
 | ------------------ | --------------------- | ---------------------------- |
@@ -429,90 +426,94 @@ stays consistent.
 
 ---
 
-## 7. The creative addition: an agent committee that plays chess
+## 7. The creative addition: a retriever over my own work
 
 ### Why this and not a honeycomb grid
 
-The assignment's own example is a honeycomb image grid, so that is the one
-thing guaranteed to appear in other submissions. More importantly, a
-decorative grid says nothing about how I actually work.
+The assignment's own example is a honeycomb image grid, which is therefore the
+one thing guaranteed to appear in other submissions. More importantly, a
+decorative grid says nothing about how I work.
 
-At AT&T I built a multi-agent system where one orchestrator coordinates three
-specialist sub-agents over MCP, and the useful signal there was never the
-final answer &mdash; it was **where the specialists disagreed**. This widget is
-that architecture, shrunk to something you can play with in ten seconds.
+Most of what I actually do is routing. At AT&T a parent orchestrator picks
+which of three specialist sub-agents handles a request over MCP. At the WiNES
+lab I built MCP servers exposing hardware as LLM-callable tools, then measured
+how often the model picked the right one. At Pibit I built the retrieval layer
+deciding which documents an answer is built from.
 
-Chess is an honest demonstration domain because the objectives genuinely
-conflict: grabbing a free pawn can wreck your king. A committee that always
-agrees would teach nothing.
+All three are the same problem — score candidates against a query, pick one,
+defend the choice — so the widget is that, pointed at my own résumé.
 
-### The engine
+### Mechanism
 
-Written from scratch in `js/chess/engine.js`, with no chess library:
+`js/retriever.js`, with no search library:
 
-- **0x88 board representation** — off-board detection is a single bit test
-- **Fully legal move generation** — castling (including through and out of
-  check), en passant, promotion, pins, checkmate and stalemate
-- **Make / unmake** with a history stack, so the search never copies the board
-- **Alpha–beta negamax** with capture-first move ordering
+- Tokenise, drop stopwords, suffix-stem
+- **BM25** ranking, `k1 = 1.5`, `b = 0.75`
+- Smoothed IDF: `ln(1 + (N − df + 0.5) / (df + 0.5))`, always positive, so a
+  matching term can never count _against_ a document — which would be
+  impossible to explain to a reader looking at the breakdown
+- Per-term contribution tracking, which is what makes the explanation possible
 
-### The agents
+### What the interface exposes
 
-| Agent       | Objective                                  | Deliberately ignores |
-| ----------- | ------------------------------------------ | -------------------- |
-| Material    | Piece values only                          | Position entirely    |
-| Space       | Central control, piece activity            | Material entirely    |
-| King safety | Shelter, exposure, distance from home rank | Material entirely    |
+| Shown                                     | Why                                          |
+| ----------------------------------------- | -------------------------------------------- |
+| Terms that carried the score, with values | Makes the ranking arguable rather than magic |
+| Runner-up documents with scores           | Shows how close the call was                 |
+| Query terms absent from the corpus        | Makes a miss explainable                     |
+| An explicit "no confident match"          | See below                                    |
 
-Each searches independently to depth 3 with its own evaluation. A coordinator
-then searches with a weighted blend (1.0 / 0.35 / 0.55) and picks the move.
-The panel reports how many agents the coordinator agreed with.
+### The refusal is the point
 
-### Honest reporting of indifference
+A retriever that always returns its best guess is the most common way tool
+routing fails in production: it answers confidently out of the wrong document.
+Below a BM25 floor of 0.9 this one says so instead.
 
-A pure material agent has **no opinion** in a quiet opening — every move scores
-zero. Rather than present an arbitrary pick as a recommendation, the agent
-says so.
+### Two bugs the design exposed
 
-This was a bug first. The original test was "top move ties with second", which
-wrongly flagged an agent as indifferent when its two _best_ moves tied — the
-agent that had just found a way to win a pawn was reported as having no
-preference. Real indifference is when _every_ move scores the same.
+**Short-document bias.** The first version scored cosine similarity over
+TF-IDF vectors, and "multi-agent orchestration over MCP" routed to _Pit Wall_
+rather than the _AT&T_ system. Both are genuinely multi-agent, but Pit Wall's
+description is shorter and L2 normalisation over-rewards short documents.
+BM25 normalises by length relative to the corpus average, which is precisely
+the problem it was designed for.
 
-### How correctness is established
+**A missing stemmer rule.** Even after BM25 the same query still missed. The
+résumé says "orchestr**ator**"; the query says "orchestr**ation**". The
+stemmer collapsed `-ation`, `-ating` and `-ated` to a shared stem but had no
+rule for the `-ator` agent noun, so the two forms never met. One rule fixed
+it, and the query then routed correctly.
 
-A move generator can be subtly wrong in ways no amount of playing by hand will
-reveal. So the engine is verified with **perft** — counting leaf nodes of the
-move tree to a fixed depth against published values:
+### Routing accuracy
 
-| Position          | Depth | Expected | Result |
-| ----------------- | ----- | -------- | ------ |
-| Start position    | 4     | 197,281  | pass   |
-| Kiwipete          | 3     | 97,862   | pass   |
-| En passant / pins | 4     | 43,238   | pass   |
-| Promotions        | 3     | 9,467    | pass   |
-| Position 5        | 3     | 62,379   | pass   |
+12 of 12 on a held-out set of realistic questions, including two that must
+return nothing. Reproducible with `npm run test:routing`.
 
-The engine was perft-verified **before any interface was built on top of it**.
-
-### Accessibility
-
-Every square is a real `<button>` in a grid with an `aria-label` naming the
-square and its occupant, so the board is fully keyboard-operable and legible
-to a screen reader. Pieces are Unicode glyphs; there is no sprite sheet.
-
-Performance is roughly 12,000 positions in ~50ms, so no web worker is needed.
+| Query                                                    | Expected            |
+| -------------------------------------------------------- | ------------------- |
+| multi-agent orchestration over MCP                       | AT&T DNS agents     |
+| how do you keep data consistent under concurrent writes? | AWS Transfer Family |
+| computer vision on video                                 | 6G mmWave           |
+| retrieval augmented generation embeddings                | Pibit.ai            |
+| kubernetes and openshift                                 | WiNES 5G testbed    |
+| reinforcement learning                                   | VR WiFi-6 paper     |
+| formula 1 race strategy                                  | Pit Wall            |
+| bayesian networks                                        | Rand-PC             |
+| anomaly detection in DNS logs                            | AT&T DNS agents     |
+| what did you build at amazon?                            | AWS Transfer Family |
+| tell me about your favourite pizza topping               | no confident match  |
+| blockchain smart contracts                               | no confident match  |
 
 ## 7b. Second interactive piece: Skill Constellation
 
-Moved to the Projects page. A force-directed graph wiring all 23 skills and
-work items together: pick a skill and every place I used it stays lit while
-the rest dims.
+On the Projects page. A force-directed graph wiring all 23 skills and work
+items together: pick a skill and every place I used it stays lit while the
+rest dims.
 
-Layout uses Fruchterman–Reingold: repulsion `k²/d`, attraction `d²/k`, ideal
-distance `k = 0.62·√(area / nodeCount)` derived from canvas size and node
-count, and a cooling temperature so it converges. Labels are drawn in a second
-pass with rectangle-collision detection.
+Fruchterman–Reingold: repulsion `k²/d`, attraction `d²/k`, ideal distance
+`k = 0.62·√(area / nodeCount)` derived from canvas size and node count, and a
+cooling temperature so it converges. Labels are drawn in a second pass with
+rectangle-collision detection.
 
 ## 8. Final implementation
 
@@ -520,12 +521,12 @@ pass with rectangle-collision detection.
 
 ![Homepage hero](../images/screenshot-home.png)
 
-### The agent board mid-game
+### The query router
 
-![The agent board](../images/screenshot-board.png)
+![The query router](../images/screenshot-router.png)
 
-Each agent reports its own recommendation and score; the one the coordinator
-adopted is outlined in green.
+The result names the routed project, the terms that carried the score with
+their BM25 contributions, and the runners-up it beat.
 
 ### Skill constellation, Projects page
 
