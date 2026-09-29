@@ -158,8 +158,12 @@ sections read from it, so a role is never described in two places.
 
 ## Design document
 
-Personas, user stories with acceptance criteria, wireframes, the design system
-and the verification table are in **[docs/DESIGN.md](docs/DESIGN.md)**.
+**📄 [Design document (PDF)](docs/DESIGN.pdf)** &nbsp;|&nbsp;
+[same content as Markdown](docs/DESIGN.md)
+
+Covers the project description, three user personas, user stories with
+acceptance criteria, information architecture, wireframes for desktop and
+mobile, the design system, and a verification table.
 
 ---
 

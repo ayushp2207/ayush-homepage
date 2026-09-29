@@ -5,6 +5,7 @@
 **Project:** Project 1 — Your personal home page
 **Live site:** https://ayushp2207.github.io/ayush-homepage/
 **Repository:** https://github.com/ayushp2207/ayush-homepage
+**PDF version:** [DESIGN.pdf](DESIGN.pdf)
 
 ---
 
