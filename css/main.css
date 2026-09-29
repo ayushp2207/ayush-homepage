@@ -1,0 +1,645 @@
+/* ==========================================================================
+   Design tokens
+   ========================================================================== */
+
+:root {
+  --ink: #0b1020;
+  --surface: #111827;
+  --surface-raised: #1b2337;
+  --line: #2b3550;
+  --text: #e2e8f0;
+  --text-muted: #94a3b8;
+  --accent: #5eead4;
+  --accent-alt: #818cf8;
+  --accent-warm: #f472b6;
+  --accent-gold: #fbbf24;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 1rem;
+  --space-4: 1.5rem;
+  --space-5: 2.5rem;
+  --space-6: 4rem;
+
+  --radius: 0.85rem;
+  --max-width: 1100px;
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+body {
+  background-color: var(--ink);
+  color: var(--text);
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  line-height: 1.65;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+a {
+  color: var(--accent);
+}
+
+a:hover,
+a:focus {
+  color: var(--accent-alt);
+}
+
+/* A single visible focus treatment for every interactive element. */
+a:focus-visible,
+button:focus-visible,
+canvas:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 999;
+  padding: var(--space-2) var(--space-3);
+  background: var(--accent);
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.skip-link:focus {
+  left: var(--space-3);
+  top: var(--space-3);
+}
+
+.page-wrap {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--space-3);
+}
+
+/* Bootstrap's .row uses negative gutters, which escape .page-wrap's padding
+   because .page-wrap is not a Bootstrap .container. Neutralise them and let the
+   columns' own padding provide the gutter. */
+.page-wrap .row {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.section {
+  padding: var(--space-6) 0;
+  border-top: 1px solid var(--line);
+}
+
+.section-title {
+  font-size: 1.05rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  margin-bottom: var(--space-4);
+}
+
+/* ==========================================================================
+   Navigation
+   ========================================================================== */
+
+.site-nav {
+  border-bottom: 1px solid var(--line);
+  background-color: var(--surface);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 700;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.nav-brand img {
+  width: 30px;
+  height: 30px;
+}
+
+.nav-toggle {
+  display: none;
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  color: var(--text);
+  padding: var(--space-1) var(--space-2);
+  font-size: 1.1rem;
+}
+
+.nav-menu {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-menu a {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.nav-menu a:hover,
+.nav-menu a[aria-current="page"] {
+  color: var(--text);
+}
+
+/* ==========================================================================
+   Hero
+   ========================================================================== */
+
+.hero {
+  padding: var(--space-6) 0 var(--space-5);
+}
+
+.hero-eyebrow {
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-bottom: var(--space-2);
+}
+
+.hero h1 {
+  font-size: clamp(2.1rem, 6vw, 3.4rem);
+  margin-bottom: var(--space-3);
+}
+
+.hero-lede {
+  font-size: 1.15rem;
+  color: var(--text-muted);
+  max-width: 58ch;
+}
+
+.hero-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  list-style: none;
+  padding: 0;
+  margin: var(--space-4) 0 0;
+}
+
+.hero-links a {
+  display: inline-block;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background-color: var(--surface-raised);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.hero-links a:hover {
+  border-color: var(--accent);
+}
+
+.hero-availability {
+  margin-top: var(--space-4);
+  padding: var(--space-3);
+  border-left: 3px solid var(--accent);
+  background-color: var(--surface);
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   Constellation (the creative addition)
+   ========================================================================== */
+
+.constellation-intro {
+  color: var(--text-muted);
+  max-width: 62ch;
+  margin-bottom: var(--space-4);
+}
+
+.constellation-stage {
+  background-color: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.constellation-canvas {
+  display: block;
+  width: 100%;
+  height: 460px;
+  touch-action: manipulation;
+}
+
+.constellation-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  list-style: none;
+  margin: 0;
+  padding: var(--space-3);
+  border-top: 1px solid var(--line);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.legend-dot {
+  display: inline-block;
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 50%;
+  margin-right: var(--space-1);
+}
+
+.legend-skill {
+  background-color: var(--accent);
+}
+
+.legend-experience {
+  background-color: var(--accent-alt);
+}
+
+.legend-project {
+  background-color: var(--accent-warm);
+}
+
+.legend-publication {
+  background-color: var(--accent-gold);
+}
+
+.constellation-controls {
+  margin-top: var(--space-4);
+}
+
+.constellation-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--space-3);
+}
+
+.constellation-chip {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background-color: var(--surface-raised);
+  color: var(--text-muted);
+  padding: 0.25rem 0.75rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.constellation-chip:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.constellation-chip.is-selected {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.constellation-detail {
+  background-color: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+  min-height: 11rem;
+}
+
+.detail-empty {
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.detail-title {
+  font-size: 1.2rem;
+  margin-bottom: var(--space-1);
+}
+
+.detail-count {
+  color: var(--accent);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: var(--space-3);
+}
+
+.detail-summary {
+  color: var(--text-muted);
+}
+
+.detail-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.detail-list li {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--line);
+}
+
+.detail-list span {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.detail-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  list-style: none;
+  padding: 0;
+  margin: var(--space-3) 0 0;
+}
+
+/* ==========================================================================
+   Timeline, cards, education, skills
+   ========================================================================== */
+
+.timeline {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.timeline-item {
+  position: relative;
+  padding-left: var(--space-4);
+  padding-bottom: var(--space-5);
+  border-left: 2px solid var(--line);
+}
+
+.timeline-item:last-child {
+  padding-bottom: 0;
+}
+
+.timeline-marker {
+  position: absolute;
+  left: -0.45rem;
+  top: 0.4rem;
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 50%;
+  background-color: var(--accent-alt);
+}
+
+.timeline-period {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: var(--space-1);
+}
+
+.timeline-role {
+  font-size: 1.2rem;
+  margin-bottom: var(--space-1);
+}
+
+.timeline-org {
+  color: var(--accent);
+  margin-bottom: var(--space-2);
+}
+
+.timeline-summary {
+  color: var(--text-muted);
+  margin: 0;
+  max-width: 68ch;
+}
+
+.work-grid {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.work-card {
+  height: 100%;
+  background-color: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+}
+
+.work-kind {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent-warm);
+  margin-bottom: var(--space-2);
+}
+
+.card-publication .work-kind {
+  color: var(--accent-gold);
+}
+
+.work-title {
+  font-size: 1.15rem;
+  margin-bottom: var(--space-1);
+}
+
+.work-meta {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-bottom: var(--space-3);
+}
+
+.work-summary {
+  margin-bottom: var(--space-3);
+}
+
+.work-details {
+  color: var(--text-muted);
+  padding-left: var(--space-3);
+  margin: 0;
+}
+
+.education-list,
+.skill-groups {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: var(--space-4);
+}
+
+.education-item {
+  border-left: 3px solid var(--accent-alt);
+  padding-left: var(--space-3);
+}
+
+.education-school {
+  font-size: 1.15rem;
+  margin-bottom: var(--space-1);
+}
+
+.education-degree {
+  margin-bottom: var(--space-1);
+}
+
+.education-meta,
+.education-coursework {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: var(--space-1);
+}
+
+.skill-group-name {
+  font-size: 0.95rem;
+  color: var(--accent);
+  margin-bottom: var(--space-2);
+}
+
+.skill-group-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.skill-pill {
+  background-color: var(--surface-raised);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.15rem 0.7rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   Prose pages and footer
+   ========================================================================== */
+
+.prose {
+  max-width: 70ch;
+}
+
+.prose h2 {
+  margin-top: var(--space-5);
+  margin-bottom: var(--space-3);
+  font-size: 1.4rem;
+}
+
+.prose h3 {
+  margin-top: var(--space-4);
+  margin-bottom: var(--space-2);
+  font-size: 1.1rem;
+}
+
+.prose p,
+.prose li {
+  color: var(--text-muted);
+}
+
+.prose code {
+  background-color: var(--surface-raised);
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.3rem;
+  color: var(--accent);
+}
+
+.callout {
+  border: 1px solid var(--accent-gold);
+  border-radius: var(--radius);
+  background-color: var(--surface);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.callout h2 {
+  margin-top: 0;
+  color: var(--accent-gold);
+}
+
+.site-footer {
+  border-top: 1px solid var(--line);
+  padding: var(--space-5) 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.site-footer ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  list-style: none;
+  padding: 0;
+  margin: var(--space-2) 0 0;
+}
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+
+@media (max-width: 767px) {
+  .nav-toggle {
+    display: block;
+  }
+
+  .nav-menu {
+    display: none;
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+    padding: var(--space-3) 0 0;
+  }
+
+  .nav-menu.is-open {
+    display: flex;
+  }
+
+  .nav-inner {
+    flex-wrap: wrap;
+  }
+
+  .constellation-canvas {
+    height: 340px;
+  }
+
+  .section {
+    padding: var(--space-5) 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms;
+    transition-duration: 0.001ms;
+  }
+}
