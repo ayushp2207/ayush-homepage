@@ -102,7 +102,7 @@
           </li>
           <li>
             Propose a creative addition that would not look like every other
-            submission, then implement it without a charting or graph library.
+            submission, then implement it without pulling in a library.
           </li>
           <li>
             Wire the project to the course ESLint configuration and Prettier,
@@ -122,7 +122,12 @@
             ES6 modules in <code>js/</code>.
           </li>
           <li>
-            The force-directed layout in <code>js/constellation.js</code>,
+            The chess engine in <code>js/chess/</code> &mdash; 0x88 board
+            representation, legal move generation, alpha&ndash;beta search and
+            the three agent evaluation functions.
+          </li>
+          <li>
+            The force-directed skill graph in <code>js/constellation.js</code>,
             including the repulsion and spring math and the canvas rendering.
           </li>
           <li>This page, end to end.</li>
@@ -136,8 +141,13 @@
             model.
           </li>
           <li>
-            The decision of what the creative addition should be and why a
-            skill-to-evidence graph is more useful than a decorative animation.
+            The decision of what the creative addition should be: a committee of
+            disagreeing agents, because that is the architecture I actually work
+            on, rather than a decorative animation.
+          </li>
+          <li>
+            Insisting the engine be verified with <code>perft</code> before any
+            interface was built on top of it.
           </li>
           <li>
             The narrated video, the code review, and the final read-through of
@@ -159,9 +169,21 @@
             had to be computed from the actual file.
           </li>
           <li>
-            Its first version of the constellation left one skill node with no
-            edges, so it floated unconnected in the middle of the graph. Fixing
-            it meant giving the node something real to connect to.
+            Its first version of the skill graph left one node with no edges, so
+            it floated unconnected in the middle of the canvas.
+          </li>
+          <li>
+            In the chess widget it marked an agent as having &ldquo;no
+            preference&rdquo; whenever its top two moves tied &mdash; but a tie
+            between two strong moves is still an opinion about every other move.
+            The agent that had just found a way to win a pawn was being reported
+            as indifferent. Real indifference is when <em>every</em>
+            move scores the same.
+          </li>
+          <li>
+            It left a stray <code>loadFen(undefined)</code> in the board reset,
+            which threw on load, so the pieces never rendered until the first
+            click and &ldquo;New game&rdquo; restored 31 pieces instead of 32.
           </li>
         </ul>
 

@@ -3,16 +3,26 @@
    ========================================================================== */
 
 :root {
-  --ink: #0b1020;
-  --surface: #111827;
-  --surface-raised: #1b2337;
-  --line: #2b3550;
-  --text: #e2e8f0;
-  --text-muted: #94a3b8;
-  --accent: #5eead4;
-  --accent-alt: #818cf8;
-  --accent-warm: #f472b6;
-  --accent-gold: #fbbf24;
+  /* Chess.com's board and interface palette: warm near-black, board greens,
+     and a single bright green that carries every call to action. */
+  --ink: #262421;
+  --surface: #312e2b;
+  --surface-raised: #3d3a37;
+  --line: #4a4642;
+  --text: #f1efed;
+  --text-muted: #a9a29b;
+
+  --accent: #81b64c;
+  --accent-strong: #95bb4a;
+  --accent-alt: #7fa650;
+
+  --board-light: #eeeed2;
+  --board-dark: #769656;
+  --board-light-active: #f6f669;
+  --board-dark-active: #baca2b;
+
+  --warn: #e0a63c;
+  --danger: #ca3431;
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -21,8 +31,8 @@
   --space-5: 2.5rem;
   --space-6: 4rem;
 
-  --radius: 0.85rem;
-  --max-width: 1100px;
+  --radius: 0.5rem;
+  --max-width: 1140px;
 }
 
 /* ==========================================================================
@@ -292,11 +302,11 @@ canvas:focus-visible {
 }
 
 .legend-project {
-  background-color: var(--accent-warm);
+  background-color: var(--warn);
 }
 
 .legend-publication {
-  background-color: var(--accent-gold);
+  background-color: var(--accent-strong);
 }
 
 .constellation-controls {
@@ -466,12 +476,12 @@ canvas:focus-visible {
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: var(--accent-warm);
+  color: var(--warn);
   margin-bottom: var(--space-2);
 }
 
 .card-publication .work-kind {
-  color: var(--accent-gold);
+  color: var(--accent-strong);
 }
 
 .work-title {
@@ -582,7 +592,7 @@ canvas:focus-visible {
 }
 
 .callout {
-  border: 1px solid var(--accent-gold);
+  border: 1px solid var(--accent-strong);
   border-radius: var(--radius);
   background-color: var(--surface);
   padding: var(--space-4);
@@ -591,7 +601,7 @@ canvas:focus-visible {
 
 .callout h2 {
   margin-top: 0;
-  color: var(--accent-gold);
+  color: var(--accent-strong);
 }
 
 .site-footer {
@@ -687,4 +697,245 @@ canvas:focus-visible {
   .hero-portrait figcaption {
     text-align: right;
   }
+}
+
+/* ==========================================================================
+   Agent board — the creative addition
+   ========================================================================== */
+
+.board-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+@media (min-width: 992px) {
+  .board-layout {
+    grid-template-columns: minmax(0, 460px) minmax(0, 1fr);
+    gap: var(--space-5);
+  }
+}
+
+.chess-board {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 12px 30px rgb(0 0 0 / 35%);
+}
+
+.chess-square {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  font-size: clamp(1.5rem, 5.4vw, 2.6rem);
+  line-height: 1;
+  transition: filter 0.12s ease;
+}
+
+.chess-square.is-light {
+  background-color: var(--board-light);
+}
+
+.chess-square.is-dark {
+  background-color: var(--board-dark);
+}
+
+.chess-square.is-last.is-light {
+  background-color: var(--board-light-active);
+}
+
+.chess-square.is-last.is-dark {
+  background-color: var(--board-dark-active);
+}
+
+.chess-square.is-selected {
+  filter: brightness(1.12);
+  box-shadow: inset 0 0 0 4px rgb(255 255 255 / 55%);
+}
+
+/* A dot for a quiet move, a ring for a capture — the chess.com convention. */
+.chess-square.is-target::after {
+  content: "";
+  position: absolute;
+  width: 30%;
+  height: 30%;
+  border-radius: 50%;
+  background-color: rgb(0 0 0 / 22%);
+}
+
+.chess-square.is-capture::after {
+  width: 86%;
+  height: 86%;
+  background-color: transparent;
+  border: 5px solid rgb(0 0 0 / 22%);
+}
+
+.chess-square.is-white-piece {
+  color: #fff;
+  text-shadow:
+    0 0 1px #3c3a37,
+    1px 1px 0 #3c3a37,
+    -1px 1px 0 #3c3a37,
+    1px -1px 0 #3c3a37,
+    -1px -1px 0 #3c3a37;
+}
+
+.chess-square.is-black-piece {
+  color: #2b2926;
+  text-shadow: 0 1px 0 rgb(255 255 255 / 25%);
+}
+
+.chess-square:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: -3px;
+  z-index: 1;
+}
+
+.board-side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.chess-status {
+  background-color: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+  margin: 0;
+  min-height: 4.6rem;
+  color: var(--text-muted);
+}
+
+.chess-status strong {
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.chess-meta {
+  display: block;
+  margin-top: var(--space-1);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.agent-list {
+  display: grid;
+  gap: var(--space-2);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.agent-card {
+  background-color: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+}
+
+.agent-card.is-agreed {
+  border-color: var(--accent);
+  background-color: rgb(129 182 76 / 10%);
+}
+
+.agent-name {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  font-weight: 700;
+  margin-bottom: var(--space-1);
+}
+
+.agent-tick {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+  background-color: var(--accent);
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+}
+
+.agent-objective {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-bottom: var(--space-2);
+}
+
+.agent-verdict {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.agent-move {
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.agent-score {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.agent-indifferent {
+  font-size: 0.85rem;
+  color: var(--warn);
+}
+
+.board-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.btn-board {
+  border: 1px solid var(--line);
+  background-color: var(--surface-raised);
+  color: var(--text);
+  border-radius: var(--radius);
+  padding: var(--space-2) var(--space-3);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-board:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.btn-board.is-primary {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: #1d2b12;
+}
+
+.btn-board.is-primary:hover {
+  background-color: var(--accent-strong);
+  color: #1d2b12;
+}
+
+.agent-card.is-resting {
+  border-style: dashed;
+}
+
+.agent-waiting {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-style: italic;
 }

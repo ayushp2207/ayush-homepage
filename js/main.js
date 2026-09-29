@@ -8,6 +8,7 @@
 
 import { skills, work, education, skillGroups } from "./data.js";
 import { createConstellation } from "./constellation.js";
+import { createBoard } from "./chess/board-ui.js";
 
 const KIND_LABEL = {
   experience: "Experience",
@@ -209,6 +210,22 @@ function initConstellation() {
   }
 }
 
+/** Mount the agent chess board if this page has one. */
+function initBoard() {
+  const boardEl = document.querySelector("#chessBoard");
+  if (!boardEl) {
+    return;
+  }
+
+  createBoard({
+    boardEl,
+    statusEl: document.querySelector("#chessStatus"),
+    panelEl: document.querySelector("#chessAgents"),
+    resetEl: document.querySelector("#chessReset"),
+    undoEl: document.querySelector("#chessUndo"),
+  });
+}
+
 function init() {
   const experience = document.querySelector("#experienceList");
   if (experience) {
@@ -236,6 +253,7 @@ function init() {
   }
 
   initConstellation();
+  initBoard();
   initNav();
   initFooterYear();
 }

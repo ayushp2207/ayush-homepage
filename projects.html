@@ -73,6 +73,58 @@
         <ul class="work-grid row g-4" id="publicationList"></ul>
       </section>
 
+      <section class="page-wrap section" aria-labelledby="constellationHeading">
+        <h2 class="section-title" id="constellationHeading">
+          Skill constellation
+        </h2>
+
+        <p class="constellation-intro">
+          A r&eacute;sum&eacute; tells you someone knows Kubernetes. It rarely
+          tells you <em>where</em> they used it. This graph wires every skill to
+          every place I actually used it &mdash; pick a node to filter, pick it
+          again to clear. The force-directed layout is hand-written canvas code
+          with no graphing library.
+        </p>
+
+        <div class="constellation-stage">
+          <canvas
+            class="constellation-canvas"
+            id="constellationCanvas"
+            role="img"
+            aria-label="Force-directed graph connecting skills to the roles, projects and publications where they were used. The same nodes are available as buttons below."
+          ></canvas>
+
+          <ul class="constellation-legend">
+            <li><span class="legend-dot legend-skill"></span>Skill</li>
+            <li>
+              <span class="legend-dot legend-experience"></span>Experience
+            </li>
+            <li><span class="legend-dot legend-project"></span>Project</li>
+            <li>
+              <span class="legend-dot legend-publication"></span>Publication
+            </li>
+          </ul>
+        </div>
+
+        <div class="row g-4 constellation-controls">
+          <div class="col-12 col-lg-7">
+            <h3 class="section-title">Pick a node</h3>
+            <ul class="constellation-list" id="constellationList"></ul>
+            <button
+              class="constellation-chip"
+              id="constellationReset"
+              type="button"
+            >
+              Clear selection
+            </button>
+          </div>
+
+          <div class="col-12 col-lg-5">
+            <div class="constellation-detail" id="constellationDetail"></div>
+          </div>
+        </div>
+      </section>
+
       <section class="page-wrap section" aria-labelledby="contactHeading">
         <h2 class="section-title" id="contactHeading">Get in touch</h2>
         <p class="hero-lede">

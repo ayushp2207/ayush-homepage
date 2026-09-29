@@ -111,38 +111,41 @@ graduate, so I can match them to a requisition._
 - When I reach the Education section
 - Then each degree shows institution, degree name, expected date and location
 
-### Epic B — Turn skill claims into evidence
+### Epic B — Show how I actually think
 
-**B1.** _As Daniel, I want to select a technology and see every place it was
-used, so I can tell real experience from a weekend tutorial._
+**B1.** _As Daniel, I want to see the candidate's architectural thinking, not
+just a list of technologies._
 
-- Given the skill constellation
-- When I select the node "Kubernetes"
-- Then a detail panel lists every role, project and publication using it
-- And it states how many places that is
-- And unrelated nodes visibly dim
+- Given the agent board on the homepage
+- When I make a move
+- Then three agents each report a different recommended reply with a score
+- And the coordinator states how many of them it agreed with
+- So the disagreement itself is the visible output
 
-**B2.** _As Daniel, I want to go the other direction — pick a role and see what
-it was built with._
+**B2.** _As Daniel, I want to know the chess engine is real and not a library._
 
-- Given the constellation
-- When I select the node "Agentic 5G Spectrum Testbed"
-- Then the panel shows that role's summary and the skills it used
+- Given the repository
+- Then `js/chess/engine.js` contains the move generator
+- And the README publishes perft node counts against known values
 
-**B3.** _As Daniel, I want to clear a selection without reloading._
-
-- Given a selected node
-- When I select the same node again, click empty canvas, or press "Clear
-  selection"
-- Then the filter clears and the panel returns to its prompt
-
-**B4.** _As Meera on a phone, I want the same filtering without a mouse._
+**B3.** _As Meera on a phone, I want to use the board without a mouse._
 
 - Given a touch device or keyboard-only navigation
-- When I Tab to the node list and press Enter
-- Then that node is selected, `aria-pressed` becomes `true`, and the same detail
-  panel updates
-- So the canvas is never the only route to the information
+- When I Tab to a square and press Enter
+- Then that piece is selected and its legal destinations are marked
+- And every square announces its name and occupant to a screen reader
+
+**B4.** _As anyone, I want to undo a bad move rather than restart._
+
+- Given at least one completed exchange
+- When I press "Take back"
+- Then my move and the coordinator's reply are both undone
+
+**B5.** _As Daniel, I want to find where a given skill was used._
+
+- Given the skill constellation on the Projects page
+- When I select "Kubernetes"
+- Then every role and project using it is listed, and unrelated nodes dim
 
 ### Epic C — Depth on demand
 
@@ -195,11 +198,11 @@ at me._
 ```
 index.html ............. Home
 ├── Hero ............... name, one-line pitch, contact, availability
-├── Skill constellation  the creative addition
+├── Agent chess board .. the creative addition
 ├── Experience ......... reverse-chronological timeline (4 roles)
 ├── Education .......... 2 degrees
 └── Toolkit ............ grouped skill lists
-projects.html .......... Projects (3) + Publications (2) + contact
+projects.html .......... Projects + Publications + skill constellation
 built-with-ai.html ..... GenAI disclosure (the AI-generated page)
 ```
 
@@ -372,23 +375,27 @@ Default (nothing selected)          Selected: "Python"
 
 ### Palette
 
-Dark, low-chroma background so the four node colours carry the meaning.
+Borrowed from chess.com, because the board is the centrepiece and the rest of
+the page should look like it belongs to the same product. Warm near-black
+rather than blue-black, so the board's greens sit naturally on it, with a
+single bright green carrying every call to action.
 
-| Token              | Value     | Use                     |
-| ------------------ | --------- | ----------------------- |
-| `--ink`            | `#0b1020` | Page background         |
-| `--surface`        | `#111827` | Cards, nav, graph stage |
-| `--surface-raised` | `#1b2337` | Pills and chips         |
-| `--line`           | `#2b3550` | All borders and rules   |
-| `--text`           | `#e2e8f0` | Body text               |
-| `--text-muted`     | `#94a3b8` | Secondary text          |
-| `--accent`         | `#5eead4` | Links, skill nodes      |
-| `--accent-alt`     | `#818cf8` | Experience nodes        |
-| `--accent-warm`    | `#f472b6` | Project nodes           |
-| `--accent-gold`    | `#fbbf24` | Publication nodes       |
+| Token              | Value                 | Use                          |
+| ------------------ | --------------------- | ---------------------------- |
+| `--ink`            | `#262421`             | Page background (warm black) |
+| `--surface`        | `#312e2b`             | Cards, nav, status panel     |
+| `--surface-raised` | `#3d3a37`             | Pills, chips, buttons        |
+| `--line`           | `#4a4642`             | All borders and rules        |
+| `--text`           | `#f1efed`             | Body text                    |
+| `--text-muted`     | `#a9a29b`             | Secondary text               |
+| `--accent`         | `#81b64c`             | Links, primary buttons       |
+| `--board-light`    | `#eeeed2`             | Light squares                |
+| `--board-dark`     | `#769656`             | Dark squares                 |
+| `--board-*-active` | `#f6f669` / `#baca2b` | Last-move highlight          |
+| `--warn`           | `#e0a63c`             | "No preference" notices      |
 
-Node colour is the same in the graph, the legend, and the card accents, so the
-encoding is learned once.
+Only one hue does the accent work. Everything that is interactive is green;
+nothing decorative is. That is what keeps a dark page from turning muddy.
 
 ### Type and spacing
 
@@ -422,47 +429,90 @@ stays consistent.
 
 ---
 
-## 7. The creative addition: Skill Constellation
+## 7. The creative addition: an agent committee that plays chess
 
 ### Why this and not a honeycomb grid
 
-The assignment's own example is a honeycomb image grid, so that is the one thing
-guaranteed to appear in other submissions. More importantly, a decorative grid
-does not answer the question a hiring manager actually has. The constellation is
-chosen because it is the _only_ element on the site that does something a static
-résumé cannot: it inverts the relationship between skill and evidence on demand.
+The assignment's own example is a honeycomb image grid, so that is the one
+thing guaranteed to appear in other submissions. More importantly, a
+decorative grid says nothing about how I actually work.
 
-### How it works
+At AT&T I built a multi-agent system where one orchestrator coordinates three
+specialist sub-agents over MCP, and the useful signal there was never the
+final answer &mdash; it was **where the specialists disagreed**. This widget is
+that architecture, shrunk to something you can play with in ten seconds.
 
-A force-directed graph on a `<canvas>`, using the Fruchterman–Reingold
-formulation:
+Chess is an honest demonstration domain because the objectives genuinely
+conflict: grabbing a free pawn can wreck your king. A committee that always
+agrees would teach nothing.
 
-- **Repulsion** between every pair of nodes: `f = k² / d`
-- **Attraction** along every edge: `f = d² / k`
-- **Ideal distance** `k = 0.62 · √(area / nodeCount)` — derived from the canvas
-  size and node count, so the same code lays out correctly at 396px and 1098px
-  with no breakpoint-specific constants
-- **Cooling**: a temperature caps how far any node may move per step and decays
-  by 2.5% per frame, so the graph converges instead of oscillating
-- **Weak centring** keeps disconnected components from drifting off-frame
+### The engine
 
-23 nodes (14 skills + 9 work items) and 26 edges. Animation halts once total
-movement falls below a threshold, so it does not burn CPU idling.
+Written from scratch in `js/chess/engine.js`, with no chess library:
 
-Labels are drawn in a second pass, in priority order, with rectangle-collision
-detection: a label that would overlap one already drawn is skipped. Without this
-the graph is unreadable — the first implementation drew all 23 labels and they
-piled on top of each other.
+- **0x88 board representation** — off-board detection is a single bit test
+- **Fully legal move generation** — castling (including through and out of
+  check), en passant, promotion, pins, checkmate and stalemate
+- **Make / unmake** with a history stack, so the search never copies the board
+- **Alpha–beta negamax** with capture-first move ordering
 
-### Honest limitations
+### The agents
 
-- The layout is deterministic by seeding positions on two rings, but it is still
-  a physical simulation, so a resize past 40px reseeds and re-settles.
-- Disconnected clusters drift apart. The AWS role sits on its own because Java,
-  DynamoDB and AWS are not shared with any other entry. That is truthful, and
-  arguably the most informative thing the graph says.
+| Agent       | Objective                                  | Deliberately ignores |
+| ----------- | ------------------------------------------ | -------------------- |
+| Material    | Piece values only                          | Position entirely    |
+| Space       | Central control, piece activity            | Material entirely    |
+| King safety | Shelter, exposure, distance from home rank | Material entirely    |
 
----
+Each searches independently to depth 3 with its own evaluation. A coordinator
+then searches with a weighted blend (1.0 / 0.35 / 0.55) and picks the move.
+The panel reports how many agents the coordinator agreed with.
+
+### Honest reporting of indifference
+
+A pure material agent has **no opinion** in a quiet opening — every move scores
+zero. Rather than present an arbitrary pick as a recommendation, the agent
+says so.
+
+This was a bug first. The original test was "top move ties with second", which
+wrongly flagged an agent as indifferent when its two _best_ moves tied — the
+agent that had just found a way to win a pawn was reported as having no
+preference. Real indifference is when _every_ move scores the same.
+
+### How correctness is established
+
+A move generator can be subtly wrong in ways no amount of playing by hand will
+reveal. So the engine is verified with **perft** — counting leaf nodes of the
+move tree to a fixed depth against published values:
+
+| Position          | Depth | Expected | Result |
+| ----------------- | ----- | -------- | ------ |
+| Start position    | 4     | 197,281  | pass   |
+| Kiwipete          | 3     | 97,862   | pass   |
+| En passant / pins | 4     | 43,238   | pass   |
+| Promotions        | 3     | 9,467    | pass   |
+| Position 5        | 3     | 62,379   | pass   |
+
+The engine was perft-verified **before any interface was built on top of it**.
+
+### Accessibility
+
+Every square is a real `<button>` in a grid with an `aria-label` naming the
+square and its occupant, so the board is fully keyboard-operable and legible
+to a screen reader. Pieces are Unicode glyphs; there is no sprite sheet.
+
+Performance is roughly 12,000 positions in ~50ms, so no web worker is needed.
+
+## 7b. Second interactive piece: Skill Constellation
+
+Moved to the Projects page. A force-directed graph wiring all 23 skills and
+work items together: pick a skill and every place I used it stays lit while
+the rest dims.
+
+Layout uses Fruchterman–Reingold: repulsion `k²/d`, attraction `d²/k`, ideal
+distance `k = 0.62·√(area / nodeCount)` derived from canvas size and node
+count, and a cooling temperature so it converges. Labels are drawn in a second
+pass with rectangle-collision detection.
 
 ## 8. Final implementation
 
@@ -470,12 +520,16 @@ piled on top of each other.
 
 ![Homepage hero](../images/screenshot-home.png)
 
-### Skill constellation with "Python" selected
+### The agent board mid-game
+
+![The agent board](../images/screenshot-board.png)
+
+Each agent reports its own recommendation and score; the one the coordinator
+adopted is outlined in green.
+
+### Skill constellation, Projects page
 
 ![Skill constellation](../images/screenshot-constellation.png)
-
-Python is ringed; its 7 connected work items stay at full opacity while the rest
-of the graph drops to 20%. The detail panel lists each one.
 
 ### Mobile
 

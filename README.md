@@ -1,9 +1,9 @@
 # Ayush Patel — Personal Homepage
 
 A static personal homepage built with vanilla HTML5, CSS3 and ES6 modules. No
-framework, no backend, no build step. Its centrepiece is an interactive
-**Skill Constellation** that wires every skill claim to the specific work where
-it was used.
+framework, no backend, no build step. Its centrepiece is a **chess engine
+written from scratch**, played by a committee of three disagreeing agents — a
+small, honest model of the multi-agent systems I build.
 
 **🔗 Live site: https://ayushp2207.github.io/ayush-homepage/**
 
@@ -23,55 +23,93 @@ makes that link browsable instead of asking you to reconstruct it from prose.
 
 ---
 
-## ⭐ The creative addition: Skill Constellation
+## ⭐ The creative addition: an agent committee that plays chess
 
 **This is the original component that differentiates this page.** It is a
-force-directed graph drawn on a `<canvas>`, written from scratch — **no D3, no
-Chart.js, no graph library of any kind.**
+complete chess engine written from scratch — **no chess library, no engine
+binary, no chart library** — driven by three specialist agents that argue
+about what to play.
 
-![The skill constellation with Python selected](images/screenshot-constellation.png)
+![The agent board](images/screenshot-board.png)
+
+### Why this and not a decorative widget
+
+At AT&T I built a multi-agent system where one orchestrator coordinates three
+specialist sub-agents over MCP. The useful signal there was never the final
+answer; it was **where the specialists disagreed**, because disagreement is
+where the interesting part of the position lives.
+
+Chess is an honest demonstration domain for that, because the objectives
+genuinely conflict. Taking a free pawn can wreck your king. A committee that
+always agrees teaches you nothing; this one frequently doesn't.
 
 ### What it does
 
-23 nodes — 14 skills plus 9 roles, projects and publications — connected by 26
-edges. Every edge means "this skill was used in this piece of work."
+You play White. On each of your moves, three agents independently search the
+position with **different evaluation functions**:
 
-- **Click a skill** and every place I used it stays lit while the rest of the
-  graph drops to 20% opacity. The side panel lists them and counts them:
-  _"Python — 7 places I have used it."_
-- **Click a role** and it works in reverse: you get that role's summary and the
-  skills it was built with.
-- **Click again, click empty space, or press Clear** to reset.
-- **It is not mouse-only.** Every node is also a real `<button>` with
-  `aria-pressed`, so the whole thing is keyboard- and screen-reader-operable.
-  The canvas is never the only route to the information.
+| Agent           | Optimises for                          | Ignores           |
+| --------------- | -------------------------------------- | ----------------- |
+| **Material**    | Raw piece values                       | Everything else   |
+| **Space**       | Central control and piece activity     | Material entirely |
+| **King safety** | Shelter and exposure around both kings | Material entirely |
 
-### How it works
+Each runs its own alpha–beta search and votes. A **coordinator** then searches
+with a weighted blend and picks the move, and the panel reports how many agents
+it agreed with. When an agent genuinely has no preference — a pure material
+agent in a quiet opening, where every move scores zero — it says so, instead of
+presenting an arbitrary pick as a recommendation.
 
-The layout uses the Fruchterman–Reingold algorithm, implemented by hand in
-[`js/constellation.js`](js/constellation.js):
+### The engine
 
-- **Repulsion** between every node pair: `f = k² / d`
-- **Attraction** along each edge: `f = d² / k`
-- **Ideal distance** `k = 0.62 · √(area / nodeCount)`, derived from canvas size
-  and node count — so the same code lays out correctly at 396px and at 1098px
-  with no breakpoint-specific magic numbers
-- **Cooling schedule**: a temperature caps per-node movement each frame and
-  decays 2.5% per step, so the graph converges instead of oscillating forever
-- **Animation stops** once total movement falls below a threshold, so an idle
-  tab burns no CPU
-- **Labels** are drawn in a second pass in priority order with
-  rectangle-collision detection; a label that would overlap one already drawn is
-  skipped. (The first version drew all 23 labels at once and they piled into an
-  illegible heap.)
-- Under `prefers-reduced-motion: reduce`, the layout is solved silently and
-  painted once, with no animation.
+In [`js/chess/engine.js`](js/chess/engine.js):
 
-One thing the graph reveals that I did not design for: the AWS role floats in
-its own cluster, because Java, DynamoDB and AWS aren't shared with any other
-entry. That is truthful, and arguably the most informative thing it says.
+- **0x88 board representation** with make/unmake
+- **Fully legal move generation**: castling through and out of check, en
+  passant, promotion, pins, and checkmate/stalemate detection
+- **Alpha–beta search** with capture-first move ordering
 
----
+And in [`js/chess/agents.js`](js/chess/agents.js), the three evaluations, the
+weighted coordinator, and algebraic move notation with check and mate suffixes.
+
+### How I know the engine is correct
+
+A chess move generator can be subtly wrong in ways that playing by hand will
+never reveal — a missed en-passant edge case, castling through an attacked
+square. So the engine is verified with **perft**: counting the leaf nodes of
+the move tree to a fixed depth and comparing against published values.
+
+| Position          | Depth | Expected | Result |
+| ----------------- | ----- | -------- | ------ |
+| Start position    | 4     | 197,281  | ✅     |
+| Kiwipete          | 3     | 97,862   | ✅     |
+| En passant / pins | 4     | 43,238   | ✅     |
+| Promotions        | 3     | 9,467    | ✅     |
+| Position 5        | 3     | 62,379   | ✅     |
+
+All five standard suites pass exactly. A generator that matches perft on
+Kiwipete is almost certainly right; one that does not is broken in a way no
+amount of manual testing would surface.
+
+Performance: roughly **12,000 positions searched in ~50ms** per move, so the
+committee replies instantly with no web worker needed.
+
+### Accessibility
+
+Every square is a real `<button>` in a grid with an `aria-label` naming its
+square and occupant, so the board is fully keyboard-operable and legible to a
+screen reader. Pieces are Unicode glyphs, so there is no sprite sheet to load.
+
+## A second interactive piece: the Skill Constellation
+
+On the [Projects page](projects.html), a force-directed graph wires all 23
+skills and work items together — pick a skill and every place I used it stays
+lit while the rest dims. Also hand-written canvas code, using the
+Fruchterman–Reingold formulation with the ideal edge length derived from canvas
+area and node count, so it lays out correctly at 396px and 1098px with no
+breakpoint-specific constants.
+
+![The skill constellation](images/screenshot-constellation.png)
 
 ## Tech requirements
 
@@ -139,8 +177,12 @@ Static site with no build step, so GitHub Pages serves the repo root directly:
 │   └── main.css               # All styles, organised by section
 ├── js/
 │   ├── main.js                # Entry point: renders sections, wires nav
-│   ├── constellation.js       # The creative addition (force-directed graph)
-│   └── data.js                # Single source of truth for all content
+│   ├── data.js                # Single source of truth for all content
+│   ├── constellation.js       # Force-directed skill graph (projects page)
+│   └── chess/
+│       ├── engine.js          # 0x88 board, legal move gen, perft
+│       ├── agents.js          # Three evaluations + coordinator, alpha-beta
+│       └── board-ui.js        # Board rendering and interaction
 ├── images/
 │   ├── favicon.svg            # Monogram icon
 │   └── screenshot-*.png       # README and design doc images
