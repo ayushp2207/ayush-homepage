@@ -220,7 +220,7 @@ Worth recording, because it is the part people leave out:
 MS Computer Science, Northeastern University · Boston, MA
 
 - 🌐 Homepage: https://ayushp2207.github.io/ayush-homepage/
-- 💼 LinkedIn: [linkedin.com/in/ayush-patel](https://linkedin.com/in/ayush-patel)
+- 💼 LinkedIn: [linkedin.com/in/ayush-patel-912041221](https://www.linkedin.com/in/ayush-patel-912041221/)
 - 💻 GitHub: [github.com/ayushp2207](https://github.com/ayushp2207)
 - ✉️ ayushnpatelworks@gmail.com
 
