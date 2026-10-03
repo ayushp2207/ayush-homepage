@@ -6,6 +6,7 @@ over my own work**: ask it a question and it routes you to the right project,
 showing the term-level scoring that decided it.
 
 **🔗 Live site: https://ayushp2207.github.io/ayush-homepage/**
+* It will be great if you can add video link, ppt link, and course link, after all of this your readme file looks perfect.
 
 ![The homepage hero](images/screenshot-home.png)
 
